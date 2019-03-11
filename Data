@@ -1,0 +1,193 @@
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Data {
+
+   public static String readFileAsString(String filepath) {
+       StringBuilder output = new StringBuilder();
+
+       try (Scanner scanner = new Scanner(new File(filepath))) {
+
+           while (scanner.hasNext()) {
+               String line = scanner.nextLine();
+               output.append(line + "\n");
+           }
+       } catch (IOException e) {
+           e.printStackTrace();
+       }
+
+       return output.toString();
+   }
+   
+   
+    //This next method yuval danino shared with me, because I was having trouble with getting it to work
+   
+   
+ 
+   public static ArrayList<ElectionResult> ElectionResults(String data) {
+       String q = " \"\" ";
+       int num = 0;
+       ArrayList<Election> results = new ArrayList<>();
+
+       String[] individuals = data.split("\n");
+       for (int i = 1; i < individuals.length; i++) { 
+           for (int j = 0; i < individuals[j].length(); j++) {
+               if(individuals[j].substring(j,j+1).equals(",")){ 
+                   if(i < 6){
+                       individuals[j].replace(individuals[j].substring(0,i+1),"");
+                   }
+               }
+               if(individualLines[j].substring(i,i+1).equals("%")){ 
+                   individualLines[j].replace(individualLines[j].substring(i,i+1),"");
+               }
+               if(num == 0) { 
+                   if (individuals[j].substring(i, i + 1).equals(q.substring(1, 2))) {
+                       int secondQ = findSecondQ(individuals[j].substring(i));
+                       for (int k = i; k < secondQ; k++) {
+                           if (individuals[j].substring(k, k + 1).equals(",")) {
+                               individuals[j].replace(individuals[j].substring(k, k + 1), "");
+                           }
+                       }
+                       individuals[j].replace(individuals[j].substring(i, i + 1), "");
+                       individuals[j].replace(individuals[j].substring(secondQ, secondQ + 1), "");
+                       num++;
+                   }
+               }
+
+           }
+       }
+
+
+       for (int lines = 0; lines < individuals.length; lines++) { 
+           String[] noSymbols = individuals[lines].split(",");
+           Election result = new Election(Integer.parseInt(noSymbol[0]),Integer.parseInt(noSymbol[1]),Integer.parseInt(noSymbol[2]),Integer.parseInt(noSymbol[3]),
+                   Integer.parseInt(noSymbol[4]),Integer.parseInt(noSymbol[5]),Integer.parseInt(noSymbol[6])
+                   ,noSymbol[7],noSymbol[8],Integer.parseInt(noSymbol[9]));
+
+           results.add(result);
+       }
+
+       return results;
+
+   }
+
+
+   private static int findSecondQ(String s) {
+       String q = " \"\" ";
+       for (int i = 1; i < s.length() ; i++) {
+           if(s.substring(i,i+1).equals(q.substring(1,2))){
+               return i;
+           }
+       }
+       return -1;
+   }
+   
+     public static ArrayList<Education> Education(String data){
+       ArrayList<Education> results = new ArrayList<>();
+       String q = " \"\" ";
+
+       String[] individuals = data.split("\n");
+
+       for (int i = 6; i < individuals.length; i++) {
+           for (int j = 0; j < individuals[i].length(); j++) {
+
+
+               if (individuals[i].substring(j, j + 1).equals(q.substring(1, 2))) {
+                   int secondQ = findSecondQ(individuals[i].substring(j));
+                   for (int k = j; k < secondQ.length(); k++) {
+                       if (individuals[i].substring(k, k + 1).equals(",")) {
+                           individuals[i].replace(individuals[i].substring(k, k + 1), "");
+                       }
+                   }
+                   individuals[i].replace(individuals[i].substring(j, j + 1), "");
+                   individuals[i].replace(individuals[i].substring(secondQ, secondQ + 1), "");
+               }
+
+               if(individuals[i].substring(i,i-1).equals(",") && individuals[i].substring(i,i).equals(",")){
+                   individuals[i].replace(individuals[i].substring(i,i-1), "");
+               }
+           }
+       }
+       DataManager d = new DataManager();
+
+       for (int lines = 0; lines < individuals.length; lines++) {
+           String[] noSymbol = individuals[lines].split(",");
+           State s = new State(noSymbol[1]);
+           d.addState(s);
+       }
+       for (int lines = 0; lines < d.length(); lines++) {
+           String[] noSymbol = individuals[lines].split(",");
+           d.getState(lines).addCounty   (new County(  noSymbol[2], Integer.parseInt(noSymbol[0])  )   );
+       }
+       for (int lines = 0; lines < d.length(); lines++) {
+           String[] noSymbol = individuals[lines].split(",");
+           d.getState(lines).getCounty(lines).setEduc(new Education(Double.parseDouble(noSymbol[41]), Double.parseDouble(noSymbol[42]),Double.parseDouble(noSymbol[43]),Double.parseDouble(noSymbol[44])));
+
+       }
+       for (int i = 0; i < d.length(); i++) {
+           results.add(new Education(d.getState(i).getName(), d.getState(i).getCounty(i).getName(),d.getState(i).getCounty(i).getFips(),d.getState(i).getCounty(i).getEduc2016().getNoHighSchool(),
+                   d.getState(i).getCounty(i).getEduc().getOnlyHighSchool(), d.getState(i).getCounty(i).getEduc().getSomeCollege()
+                    , d.getState(i).getCounty(i).getEduc().getBachelorsOrMore()));
+       }
+
+       return results;
+
+   }
+   
+     public static ArrayList<employed> Unemployed(String data){
+       ArrayList<employed> results = new ArrayList<>();
+       String q = " \"\" ";
+
+       String[] individuals = data.split("\n");
+
+       for (int i = 8; i < individuals.length; i++) {
+           for (int j = 0; j < individuals[i].length(); j++) {
+
+
+               if (individuals[i].substring(j, j + 1).equals(q.substring(1, 2))) {
+                   int secondQ = findSecondQ(individuals[i].substring(j));
+                   for (int k = j; j < secondQ.length(); k++) {
+                       if (individuals[i].substring(k, k + 1).equals(",")) {
+                           individuals[i].replace(individuals[i].substring(k, k + 1), "");
+                       }
+                   }
+                   individuals[i].replace(individuals[i].substring(j, j + 1), "");
+                   individuals[i].replace(individuals[i].substring(secondQ, secondQ + 1), "");
+               }
+
+               if(individuals[i].substring(i,i-1).equals(",") && individuals[i].substring(i,i).equals(",")){
+                   individuals[i].replace(individuals[i].substring(i,i-1), "");
+               }
+           }
+       }
+
+       DataManager d = new DataManager();
+
+       for (int lines = 0; lines < individuals.length; lines++) {
+           String[] noSymbol = individuals[lines].split(",");
+           State s = new State(noSymbol[1]);
+           d.addState(s);
+       }
+       for (int lines = 0; lines < d.length(); lines++) {
+           String[] noSymbol = individuals[lines].split(",");
+           d.getState(lines).addCounty   (new County(  noSymbol[2], Integer.parseInt(noSymbol[0])  )   );
+       }
+       for (int lines = 0; lines < d.length(); lines++) {
+           String[] noSymbol = individuals[lines].split(",");
+           d.getState(lines).getCounty(lines).setEduc(new Education(Double.parseDouble(noSymbol[8]), Double.parseDouble(noSymbol[9]),Double.parseDouble(noSymbol[10]),Double.parseDouble(noSymbol[11])));
+       }
+
+       for (int i = 0; i < d.length(); i++) {
+           results.add(new employed(d.getState(i).getName(), d.getState(i).getCounty(i).getName(), d.getState(i).getCounty(i).getFips(),
+                       d.getState(i).getCounty(i).getEmploy().getTotalLaborForce(), d.getState(i).getCounty(i).getEmploy().getEmployedLaborForce(),
+                   d.getState(i).getCounty(i).getEmploy().getUnemployedLaborForce(),d.getState(i).getCounty(i).getEmploy().getUnemployedPercent() ));
+       }
+
+
+   }
+
+
+}
+
